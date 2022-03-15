@@ -41,7 +41,7 @@ import cgtypes # cgkit 1.x, "pip install cgkit1"
 import numpy
 import scipy.sparse
 array=numpy.array
-from matplotlib import delaunay
+from matplotlib.tri import Triangulation
 from util import get_mean_interommatidial_distance, flatten_cubemap, \
      make_receptor_sensitivities,  make_repr_able, save_as_python, cube_order
 import sys, os, csv
@@ -593,7 +593,7 @@ def voronoi( tri ):
     return numpy.array(
         [(tri.circumcenters[i], tri.circumcenters[j])
          for i in xrange(len(tri.circumcenters))
-         for j in tri.triangle_neighbors[i] if j != -1])
+         for j in tri.neighbors[i] if j != -1])
 
 def my_voronoi( tri, verts_x, verts_y ):
     all_ordered_tri_idxs=[]
@@ -605,7 +605,7 @@ def my_voronoi( tri, verts_x, verts_y ):
 
         # Find all triangles around this vertex
         my_tri_idxs = []
-        for test_tri_idx,test_tri in enumerate(tri.triangle_nodes):
+        for test_tri_idx,test_tri in enumerate(tri.triangles): #accomodate API change
             for test_idx in test_tri:
                 if test_idx==idx:
                     my_tri_idxs.append(test_tri_idx)
@@ -628,8 +628,8 @@ def my_voronoi( tri, verts_x, verts_y ):
                 del my_tri_idxs[test_idx_idx]
                 continue
 
-            #print('neighbors',tri.triangle_neighbors[test_idx])
-            for neighbor_idx in tri.triangle_neighbors[test_idx]:
+            #print('neighbors',tri.neighbors[test_idx])
+            for neighbor_idx in tri.neighbors[test_idx]:
                 if neighbor_idx == ordered_tri_idxs[0]:
                     ordered_tri_idxs.insert(0,test_idx)
                     del my_tri_idxs[test_idx_idx]
@@ -645,13 +645,13 @@ def my_voronoi( tri, verts_x, verts_y ):
         # check if endpoints are neighbors
         first_idx = ordered_tri_idxs[0]
         last_idx = ordered_tri_idxs[-1]
-        neighbor_idxs = tri.triangle_neighbors[first_idx]
+        neighbor_idxs = tri.neighbors[first_idx]
         if last_idx not in neighbor_idxs:
             ordered_tri_idxs.append(-1)
 
         #print(ordered_tri_idxs)
         #for oti in ordered_tri_idxs:
-            #print(oti,':',tri.triangle_nodes[oti])
+            #print(oti,':',tri.triangles[oti])
 
         # Now we have ordered list of bordering triangles.
         # We know that each triangle is numbered CCW
@@ -664,7 +664,7 @@ def my_voronoi( tri, verts_x, verts_y ):
 def plot_stuff():
     import pylab
     pylab.plot(x,y,'ko')
-    for tn in tri.triangle_nodes:
+    for tn in tri.triangles: #accomodate API change, formerly tri.triangle_nodes
         a,b,c=tn[0],tn[1],tn[2]
         tx = x[a],x[b],x[c],x[a]
         ty = y[a],y[b],y[c],y[a]
@@ -717,7 +717,7 @@ def main():
 
     ## triangulate data ###############################
 
-    left_tri = delaunay.Triangulation(x, y)
+    left_tri = Triangulation(x, y) # fix for changes in matplotlib API
 
     ## transform data to long & lat ###################
     hlong,hlat,hR = xform_stereographic_2_long_lat(x,y)
@@ -727,7 +727,7 @@ def main():
     left_receptor_dirs = numpy.asarray(long_lat2xyz(long,lat,R))
     left_receptor_dirs = numpy.transpose( left_receptor_dirs )
     left_receptor_dirs = [cgtypes.vec3(v) for v in left_receptor_dirs]
-    left_triangles = left_tri.triangle_nodes
+    left_triangles = left_tri.triangles
     left_ordered_tri_idxs = my_voronoi(left_tri,x,y)
     left_hex_faces = []
     for center_vert_idx in range(len(left_receptor_dirs)):

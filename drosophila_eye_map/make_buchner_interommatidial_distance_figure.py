@@ -30,7 +30,7 @@
 # Author: Andrew D. Straw
 from __future__ import division, print_function
 import numpy as np
-import matplotlib.delaunay as dlny
+from matplotlib.tri import Triangulation
 
 import precomputed_buchner71 as precomputed_buchner_1971
 from util import get_mean_interommatidial_distance, xyz2lonlat
@@ -47,7 +47,7 @@ def do_projection( proj, lon_lats, dists, xres = 120, yres = 100 ):
     y=y[good]
     dists=dists[good]
 
-    tri = dlny.Triangulation(x, y)
+    tri = Triangulation(x, y)
     interp = tri.nn_interpolator(dists)
 
     X,Y = np.mgrid[ min(y):max(y):yres*1j, min(x):max(x):xres*1j]
