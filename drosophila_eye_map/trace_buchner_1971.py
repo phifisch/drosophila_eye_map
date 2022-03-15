@@ -27,10 +27,10 @@
 #
 # Author: Andrew D. Straw
 
-from __future__ import division
+
 import os, hashlib
-import Image
-import pylab
+from PIL import Image
+import matplotlib.pyplot as plt
 import numpy
 
 R2D=180/numpy.pi
@@ -174,14 +174,14 @@ def xform_my_long_lat_2_heisenberg_old(long,lat,R=1.0):
 
 if 0:
     long,lat = invert( 2.129, .9204 )
-    print long*R2D, lat*R2D
-    print xform_long_lat(long,lat)
-    print
+    print(long*R2D, lat*R2D)
+    print(xform_long_lat(long,lat))
+    print()
 
-fig=pylab.figure()
+fig=plt.figure()
 ax1=fig.add_axes([.1,.1,.8,.8],label='image')
 if 1:
-    ax1.imshow(im,origin='lower',
+    ax1.imshow(im,#origin='lower',
                extent=im_extent,
                aspect='equal')
 #ax1.plot([0.0],[0.0],'rx')
@@ -200,8 +200,8 @@ if 1:
         if 0:
             #x,y=xform_long_lat(this_long,8/9*(-numpy.pi/2))
             x,y=xform_long_lat(this_long,0)#-numpy.pi/2)
-            print this_long*R2D,':',x,y
-            print
+            print(this_long*R2D,':',x,y)
+            print()
             ax1.plot([x],[y],'rx')
 
     x= [2.1679711947690445, 2.1888012950502311,
@@ -227,7 +227,7 @@ if 1:
               -0.46974875799143545, -0.61271208809458089, -0.48881053533852148,
               -0.63495082833284788, -0.71119793772119222, -0.85098430493315658,
               -0.91452356275677682, -0.80650682445662247])
-    print len(x)
+    print(len(x))
     x.extend([2.129,1.428])
     y.extend([.9204,-.3218])
 
@@ -298,14 +298,14 @@ if 1:
             mindist = float(dist[idx[1]]) # don't compare self
             md.append((mindist,i,idx[1], x[i],y[i]))
         md.sort()
-        print 'md[:10]',repr(md[:10])
+        print('md[:10]',repr(md[:10]))
             #print 'dist[idx[0]]',dist[idx[0]]
             #print 'idx[0]',idx[0]
             #print x[idx[0]], y[idx[0]]
 
 
-    print 'x=',repr(x)
-    print 'y=',repr(y)
+    print('x=',repr(x))
+    print('y=',repr(y))
     hlong,hlat,hR = xform_stereographic_2_long_lat(x,y)
     long,lat,R = xform_heisenberg_long_lat_2_my(hlong,hlat,hR)
     #print 'long',repr(long*R2D)
@@ -329,12 +329,12 @@ class ClickGetter:
         # get the x and y coords, flip y from top to bottom
         if event.button==1:
             if event.inaxes is not None:
-                print 'SAVED'
+                print('SAVED')
                 self.xcoords.append(event.xdata)
                 self.ycoords.append(event.ydata)
 
 cg = ClickGetter()
-binding_id=pylab.connect('button_press_event', cg.on_click)
-pylab.show()
-print 'x=',repr(cg.xcoords)
-print 'y=',repr(cg.ycoords)
+binding_id=plt.connect('button_press_event', cg.on_click)
+plt.show()
+print('x=',repr(cg.xcoords))
+print('y=',repr(cg.ycoords))
